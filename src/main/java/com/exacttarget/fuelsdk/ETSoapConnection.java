@@ -77,6 +77,7 @@ public class ETSoapConnection {
 
     private String endpoint = null;
 
+    private ETProxy etProxy = null;
     private Soap soap = null;
     private Client soapClient = null;
     private SOAPFactory soapFactory = null;
@@ -88,10 +89,12 @@ public class ETSoapConnection {
      * @param endpoint  The endpoint URL
      * @throws com.exacttarget.fuelsdk.ETSdkException
     */
-    public ETSoapConnection(ETClient client, String endpoint)
+    public ETSoapConnection(ETClient client, String endpoint, ETProxy etProxy)
         throws ETSdkException
     {
         this.endpoint = endpoint;
+
+        this.etProxy = etProxy;
 
         //
         // Initialize the SOAP proxy:
@@ -126,6 +129,13 @@ public class ETSoapConnection {
                 // the fuelsdk.properties file is not an integer.
             }
             HTTPClientPolicy clientPolicy = new HTTPClientPolicy();
+
+            if(etProxy !=null){
+                clientPolicy.setProxyServerType(etProxy.getProxyServerType());
+                clientPolicy.setProxyServer(etProxy.getProxyServer());
+                clientPolicy.setProxyServerPort(etProxy.getProxyServerPort());
+            }
+
             if (cxfConnectTimeout != null) {
                 clientPolicy.setConnectionTimeout(cxfConnectTimeout);
             }
@@ -163,10 +173,10 @@ public class ETSoapConnection {
     */
     public ETSoapConnection(ETClient client, String endpoint,
                             String username,
-                            String password)
+                            String password, ETProxy etProxy)
         throws ETSdkException
     {
-        this(client, endpoint);
+        this(client, endpoint, etProxy);
 
         try {
             List<Header> headers = new ArrayList<Header>();
@@ -204,10 +214,10 @@ public class ETSoapConnection {
      * @param accessToken   The access token
      * @throws com.exacttarget.fuelsdk.ETSdkException
     */
-    public ETSoapConnection(ETClient client, String endpoint, String accessToken)
+    public ETSoapConnection(ETClient client, String endpoint, String accessToken, ETProxy etProxy)
         throws ETSdkException
     {
-        this(client, endpoint);
+        this(client, endpoint, etProxy);
 
         try {
             List<Header> headers = new ArrayList<Header>();
@@ -267,5 +277,9 @@ public class ETSoapConnection {
             logger.debug("updated SOAP header with new access token "
                     + accessToken);
         }
+    }
+
+    public ETProxy getEtProxy() {
+        return etProxy;
     }
 }

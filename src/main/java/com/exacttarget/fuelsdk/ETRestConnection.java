@@ -67,16 +67,19 @@ public class ETRestConnection {
 
     private boolean isAuthConnection = false;
 
+    private ETProxy etProxy = null;
+
+
     /** 
     * Class constructor, Initializes a new instance of the class.
      * @param client    The ETClient object
      * @param endpoint  The endpoint URL
      * @throws com.exacttarget.fuelsdk.ETSdkException
     */
-    public ETRestConnection(ETClient client, String endpoint)
+    public ETRestConnection(ETClient client, String endpoint, ETProxy etProxy)
         throws ETSdkException
     {
-        this(client, endpoint, false);
+        this(client, endpoint, false, etProxy);
     }
 
     /** 
@@ -86,7 +89,7 @@ public class ETRestConnection {
      * @param isAuthConnection      true is it is an auth connection, false otherwise
      * @throws com.exacttarget.fuelsdk.ETSdkException
     */
-    public ETRestConnection(ETClient client, String endpoint, boolean isAuthConnection)
+    public ETRestConnection(ETClient client, String endpoint, boolean isAuthConnection, ETProxy etProxy)
         throws ETSdkException
     {
         this.client = client;
@@ -94,6 +97,8 @@ public class ETRestConnection {
         this.endpoint = endpoint;
 
         this.isAuthConnection = isAuthConnection;
+
+        this.etProxy = etProxy;
     }
 
     /**
@@ -238,8 +243,11 @@ public class ETRestConnection {
         
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) url.openConnection();
-            
+            if(etProxy!=null){
+                connection = (HttpURLConnection) url.openConnection(etProxy.getRestProxy());
+            }else{
+                connection = (HttpURLConnection) url.openConnection();
+            }
             connection.setRequestProperty("User-Agent", "FuelSDK-Java-v1.2.2-REST-"+method+"-"+object);
             connection.setRequestMethod(method.toString());
         } catch (ProtocolException ex) {
@@ -307,6 +315,10 @@ public class ETRestConnection {
         }
         
         return connection;
+    }
+
+    public ETProxy getEtProxy() {
+        return etProxy;
     }
 
     private String receiveResponse(HttpURLConnection connection)
